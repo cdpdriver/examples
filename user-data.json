@@ -1,0 +1,18 @@
+{
+    "name": "Zendriver",
+    "title": "Senior Browser Automation Engineer",
+    "email": "zendriver@example.com",
+    "location": "San Francisco, CA",
+    "avatar": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij48ZGVmcz48c3R5bGU+LmJne2ZpbGw6IzY2N2VlYX0udGV4dHtmaWxsOiNmZmY7Zm9udC1mYW1pbHk6QXJpYWwsIHNhbnMtc2VyaWY7Zm9udC1zaXplOjEyMHB4O2ZvbnQtd2VpZ2h0OmJvbGQ7fTwvc3R5bGU+PC9kZWZzPjxjaXJjbGUgY2xhc3M9ImJnIiBjeD0iMTI4IiBjeT0iMTI4IiByPSIxMjgiLz48dGV4dCBjbGFzcz0idGV4dCIgeD0iMTI4IiB5PSIxNjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlo8L3RleHQ+PC9zdmc+",
+    "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    "skills": [
+        "JavaScript",
+        "Python",
+        "React",
+        "Node.js",
+        "AWS",
+        "Docker",
+        "GraphQL",
+        "TypeScript"
+    ]
+}

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mouse Tester Demo - Zendriver</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f5f5f5;
+        min-height: 100vh;
+        padding: 2rem 1rem;
+      }
+
+      .card {
+        max-width: 800px;
+        margin: 2rem auto;
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      }
+
+      #canvas-container {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        overflow: hidden;
+        cursor: crosshair;
+      }
+
+      #mouse-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .stats-panel {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.875rem;
+        font-family: monospace;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+      }
+
+      .info-label {
+        font-weight: 500;
+        margin-right: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .info-value {
+        color: #8aeaff;
+      }
+
+      .reset-button {
+        margin-top: 1rem;
+      }
+
+      .controls {
+        margin-bottom: 1rem;
+      }
+
+      .color-option {
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+
+      .color-option.active {
+        border-color: #000;
+      }
+
+      .disclaimer {
+        margin-top: 2rem;
+        padding-bottom: 1rem;
+        text-align: center;
+        color: rgba(0, 0, 0, 0.6);
+      }
+
+      /* Event log styles */
+      .event-log {
+        margin-top: 1.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        background-color: #f8f9fa;
+        height: 200px;
+        overflow-y: auto;
+      }
+
+      .event-log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background-color: #e9ecef;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .log-entry {
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid #eee;
+        font-family: monospace;
+        font-size: 0.875rem;
+      }
+
+      .log-entry:last-child {
+        border-bottom: none;
+      }
+
+      .log-entry.move {
+        color: #0d6efd;
+      }
+
+      .log-entry.press {
+        color: #198754;
+      }
+
+      .log-entry.release {
+        color: #dc3545;
+      }
+
+      .log-timestamp {
+        color: #6c757d;
+        margin-right: 0.5rem;
+      }
+
+      .clear-log {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center mt-4 mb-4">Mouse Tester Demo</h1>
+      <p class="text-center mb-4" style="max-width: 600px; margin: 0 auto">
+        This is a demo page for
+        <a href="https://github.com/stephanlensky/zendriver">Zendriver</a>
+        to show how to track mouse interactions. Move, click, or drag your mouse
+        on the canvas below.
+      </p>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="controls">
+            <div class="mb-3">
+              <label class="form-label">Trail Color:</label>
+              <div
+                id="color-picker"
+                aria-label="Color picker"
+                role="radiogroup"
+              >
+                <span
+                  class="color-option active"
+                  style="background-color: #1976d2"
+                  data-color="#1976d2"
+                  role="radio"
+                  aria-checked="true"
+                  tabindex="0"
+                ></span>
+                <span
+                  class="color-option"
+                  style="background-color: #dc3545"
+                  data-color="#dc3545"
+                  role="radio"
+                  aria-checked="false"
+                  tabindex="0"
+                ></span>
+                <span
+                  class="color-option"
+                  style="background-color: #28a745"
+                  data-color="#28a745"
+                  role="radio"
+                  aria-checked="false"
+                  tabindex="0"
+                ></span>
+                <span
+                  class="color-option"
+                  style="background-color: #ffc107"
+                  data-color="#ffc107"
+                  role="radio"
+                  aria-checked="false"
+                  tabindex="0"
+                ></span>
+                <span
+                  class="color-option"
+                  style="background-color: #6f42c1"
+                  data-color="#6f42c1"
+                  role="radio"
+                  aria-checked="false"
+                  tabindex="0"
+                ></span>
+              </div>
+            </div>
+
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="persistTrails"
+                checked
+              />
+              <label class="form-check-label" for="persistTrails"
+                >Persist trails</label
+              >
+            </div>
+          </div>
+
+          <div id="canvas-container" aria-label="Mouse interaction area">
+            <canvas id="mouse-canvas"></canvas>
+
+            <div class="stats-panel">
+              <div class="info-row">
+                <span class="info-label">Position:</span>
+                <span id="mouse-position" class="info-value">0, 0</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Clicks:</span>
+                <span id="click-count" class="info-value">0</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">State:</span>
+                <span id="mouse-state" class="info-value">Idle</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Distance:</span>
+                <span id="mouse-distance" class="info-value">0px</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            id="reset-button"
+            class="btn btn-secondary reset-button"
+            aria-label="Reset canvas"
+          >
+            Reset Canvas
+          </button>
+
+          <!-- Event Log Section -->
+          <div class="event-log" id="event-log">
+            <div class="event-log-header">
+              <span>Event Log</span>
+              <button
+                id="clear-log"
+                class="btn btn-sm btn-outline-secondary clear-log"
+              >
+                Clear Log
+              </button>
+            </div>
+            <div id="log-entries"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <small>
+        This is a demo page for
+        <a href="https://github.com/stephanlensky/zendriver">Zendriver</a>.
+        Mouse activity is tracked only in the canvas area.
+      </small>
+    </div>
+
+    <script>
+      // Canvas setup
+      const canvas = document.getElementById("mouse-canvas");
+      const ctx = canvas.getContext("2d");
+      const container = document.getElementById("canvas-container");
+
+      // Resize canvas to match container size
+      function resizeCanvas() {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+      }
+
+      // Initialize counters and state
+      let clickCount = 0;
+      let isDragging = false;
+      let lastPosition = { x: 0, y: 0 };
+      let currentPosition = { x: 0, y: 0 };
+      let totalDistance = 0;
+      let currentColor = "#1976d2";
+      let persistTrails = true;
+
+      // Elements
+      const mousePosition = document.getElementById("mouse-position");
+      const clickCounter = document.getElementById("click-count");
+      const mouseState = document.getElementById("mouse-state");
+      const mouseDistance = document.getElementById("mouse-distance");
+      const resetButton = document.getElementById("reset-button");
+      const persistTrailsCheckbox = document.getElementById("persistTrails");
+      const colorOptions = document.querySelectorAll(".color-option");
+      const logEntries = document.getElementById("log-entries");
+      const clearLogButton = document.getElementById("clear-log");
+
+      // Initialize canvas
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+      clearCanvas();
+
+      // Mouse event listeners
+      canvas.addEventListener("mousemove", handleMouseMove);
+      canvas.addEventListener("mousedown", handleMouseDown);
+      canvas.addEventListener("mouseup", handleMouseUp);
+      canvas.addEventListener("mouseleave", handleMouseLeave);
+      resetButton.addEventListener("click", clearCanvas);
+      persistTrailsCheckbox.addEventListener("change", togglePersistTrails);
+      clearLogButton.addEventListener("click", clearLog);
+
+      // Color picker
+      colorOptions.forEach((option) => {
+        option.addEventListener("click", function () {
+          // Update active state
+          colorOptions.forEach((opt) => {
+            opt.classList.remove("active");
+            opt.setAttribute("aria-checked", "false");
+          });
+          this.classList.add("active");
+          this.setAttribute("aria-checked", "true");
+
+          // Set current color
+          currentColor = this.dataset.color;
+        });
+
+        // Keyboard accessibility
+        option.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+      function handleMouseMove(e) {
+        const rect = canvas.getBoundingClientRect();
+        currentPosition = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+
+        // Update position display
+        mousePosition.textContent = `${Math.round(
+          currentPosition.x
+        )}, ${Math.round(currentPosition.y)}`;
+
+        // Log movement (throttled to reduce log spam)
+        if (Math.random() < 0.05) {
+          logEvent(
+            "move",
+            `Mouse moved to (${Math.round(currentPosition.x)}, ${Math.round(
+              currentPosition.y
+            )})`
+          );
+        }
+
+        // Draw if dragging
+        if (isDragging) {
+          drawLine(lastPosition, currentPosition);
+
+          // Calculate distance
+          const dx = currentPosition.x - lastPosition.x;
+          const dy = currentPosition.y - lastPosition.y;
+          const segmentDistance = Math.sqrt(dx * dx + dy * dy);
+          totalDistance += segmentDistance;
+          mouseDistance.textContent = `${Math.round(totalDistance)}px`;
+        }
+
+        lastPosition = { ...currentPosition };
+      }
+
+      function handleMouseDown(e) {
+        isDragging = true;
+        mouseState.textContent = "Dragging";
+
+        // Record the position
+        const rect = canvas.getBoundingClientRect();
+        lastPosition = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+
+        // Log the event
+        logEvent(
+          "press",
+          `Mouse pressed at (${Math.round(lastPosition.x)}, ${Math.round(
+            lastPosition.y
+          )})`
+        );
+
+        // Draw a dot at click position
+        drawDot(lastPosition);
+      }
+
+      function handleMouseUp() {
+        if (isDragging) {
+          clickCount++;
+          clickCounter.textContent = clickCount;
+          isDragging = false;
+          mouseState.textContent = "Released";
+
+          // Log the event
+          logEvent(
+            "release",
+            `Mouse released at (${Math.round(currentPosition.x)}, ${Math.round(
+              currentPosition.y
+            )})`
+          );
+        }
+      }
+
+      function handleMouseLeave() {
+        if (isDragging) {
+          mouseState.textContent = "Left canvas";
+          isDragging = false;
+
+          // Log the event
+          logEvent("release", "Mouse left canvas while dragging");
+        }
+      }
+
+      function drawLine(from, to) {
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      function drawDot(position) {
+        ctx.beginPath();
+        ctx.arc(position.x, position.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = currentColor;
+        ctx.fill();
+      }
+
+      function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        totalDistance = 0;
+        mouseDistance.textContent = "0px";
+        mouseState.textContent = "Idle";
+
+        // Log the event
+        logEvent("info", "Canvas cleared");
+      }
+
+      function togglePersistTrails() {
+        persistTrails = persistTrailsCheckbox.checked;
+
+        // Log the event
+        logEvent(
+          "info",
+          persistTrails
+            ? "Trails persistence enabled"
+            : "Trails persistence disabled"
+        );
+
+        // Set up animation loop if not persisting trails
+        if (!persistTrails) {
+          animateCanvas();
+        }
+      }
+
+      function animateCanvas() {
+        if (!persistTrails) {
+          // Fade effect by drawing semi-transparent rectangle
+          ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Continue animation
+          requestAnimationFrame(animateCanvas);
+        }
+      }
+
+      // Log event to the console
+      function logEvent(type, message) {
+        const timestamp = new Date().toLocaleTimeString();
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${type}`;
+        entry.innerHTML = `<span class="log-timestamp">${timestamp}</span> ${message}`;
+
+        // Add to log
+        logEntries.appendChild(entry);
+
+        // Auto-scroll to bottom
+        logEntries.scrollTop = logEntries.scrollHeight;
+
+        // Limit number of entries (keep last 100)
+        while (logEntries.children.length > 100) {
+          logEntries.removeChild(logEntries.firstChild);
+        }
+      }
+
+      // Clear the event log
+      function clearLog() {
+        logEntries.innerHTML = "";
+        logEvent("info", "Log cleared");
+      }
+    </script>
+  </body>
+</html>

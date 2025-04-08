@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>API Request Demo - Zendriver</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f5f5f5;
+        min-height: 100vh;
+        padding: 2rem 1rem;
+      }
+
+      .card {
+        max-width: 600px;
+        margin: 2rem auto;
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      }
+
+      .loading-container {
+        text-align: center;
+        padding: 3rem;
+        color: rgba(0, 0, 0, 0.54);
+      }
+
+      .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: #1976d2;
+      }
+
+      .error-message {
+        text-align: center;
+        color: #dc3545;
+        padding: 2rem;
+      }
+
+      .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .profile-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      .profile-name {
+        margin: 0;
+        color: #1976d2;
+      }
+
+      .profile-title {
+        color: #666;
+        margin: 0.5rem 0 0 0;
+      }
+
+      .info-label {
+        font-weight: 500;
+        color: #666;
+      }
+
+      .retry-button {
+        margin-top: 1rem;
+      }
+
+      .disclaimer {
+        position: fixed;
+        bottom: 1rem;
+        left: 0;
+        right: 0;
+        text-align: center;
+        z-index: 1000;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center mt-4 mb-4">API Request Demo</h1>
+      <p class="text-center mb-4" style="max-width: 600px; margin: 0 auto">
+        This is a demo page for
+        <a href="https://github.com/stephanlensky/zendriver">Zendriver</a>
+        to show how to scrape a website that loads data via API requests.
+      </p>
+
+      <div id="content">
+        <!-- Content will be loaded here -->
+        <div class="loading-container">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3">Loading user data...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      <small>
+        This is a demo page for
+        <a href="https://github.com/stephanlensky/zendriver">Zendriver</a>. Data
+        is loaded from a static JSON file.
+      </small>
+    </div>
+
+    <script>
+      async function fetchUserData() {
+        try {
+          // Show loading state
+          const content = document.getElementById("content");
+          content.innerHTML = `
+            <div class="loading-container">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-3">Loading user data...</p>
+            </div>
+          `;
+
+          // Simulate network delay
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+
+          // Fetch the JSON file
+          const response = await fetch("user-data.json");
+          if (!response.ok) {
+            throw new Error(`HTTP error status: ${response.status}`);
+          }
+
+          const userData = await response.json();
+          displayUserData(userData);
+        } catch (error) {
+          displayError(error);
+          console.error("Error fetching user data:", error);
+        }
+      }
+
+      function displayUserData(user) {
+        const content = document.getElementById("content");
+        content.innerHTML = `
+          <div class="card">
+            <div class="card-body">
+              <div class="profile-header">
+                <img
+                  src="${user.avatar}"
+                  alt="Profile picture of ${user.name}"
+                  class="profile-image"
+                  aria-label="Profile avatar"
+                >
+                <div>
+                  <h2 class="profile-name" aria-label="Name">${user.name}</h2>
+                  <p class="profile-title" aria-label="Job title">${
+                    user.title
+                  }</p>
+                </div>
+              </div>
+
+              <div class="mb-3" role="group" aria-label="Contact information">
+                <span class="info-label" id="email-label">Email:</span>
+                <span aria-labelledby="email-label">${user.email}</span>
+              </div>
+
+              <div class="mb-3" role="group" aria-label="Location information">
+                <span class="info-label" id="location-label">Location:</span>
+                <span aria-labelledby="location-label">${user.location}</span>
+              </div>
+
+              <div class="mb-3" role="group" aria-label="Biography">
+                <span class="info-label" id="bio-label">Bio:</span>
+                <p class="mt-2" aria-labelledby="bio-label">${user.bio}</p>
+              </div>
+
+              <div class="mb-3" role="group" aria-label="Skills">
+                <span class="info-label" id="skills-label">Skills:</span>
+                <div class="mt-2" aria-labelledby="skills-label">
+                  ${user.skills
+                    .map(
+                      (skill) => `
+                    <span class="badge bg-primary me-2 mb-2" role="listitem">${skill}</span>
+                  `
+                    )
+                    .join("")}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function displayError(error) {
+        const content = document.getElementById("content");
+        content.innerHTML = `
+          <div class="error-message">
+            <h3>Error Loading Data</h3>
+            <p>${error.message}</p>
+            <button
+              class="btn btn-primary retry-button"
+              onclick="fetchUserData()"
+              aria-label="Retry loading user data"
+            >
+              Retry
+            </button>
+          </div>
+        `;
+      }
+
+      // Start the data fetch when page loads
+      fetchUserData();
+    </script>
+  </body>
+</html>
