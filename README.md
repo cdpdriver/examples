@@ -10,3 +10,4 @@ Index:
 - [login-page.html](https://slensky.com/zendriver-examples/login-page.html)
 - [mouse-tester.html](https://slensky.com/zendriver-examples/mouse-tester.html)
 - [scrollable-cards.html](https://slensky.com/zendriver-examples/scrollable-cards.html)
+- [console.html](https://slensky.com/zendriver-examples/console.html)
